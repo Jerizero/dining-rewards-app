@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Eye, RotateCcw, MapPin } from 'lucide-react';
 import { Venue } from '../types';
 
@@ -17,21 +17,40 @@ export const HiddenPlacesModal: React.FC<HiddenPlacesModalProps> = ({
   onUnhide,
   onRestoreAll,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="hidden-places-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full sm:max-w-md bg-zinc-900 border border-zinc-800 rounded-t-3xl sm:rounded-2xl max-h-[85vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-white text-base">Hidden Places</h3>
+            <h3 id="hidden-places-title" className="font-bold text-white text-base">Hidden Places</h3>
             <p className="text-xs text-zinc-400">
               {hiddenVenues.length} {hiddenVenues.length === 1 ? 'place' : 'places'} hidden from your feed
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close hidden places dialog"
             className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800"
           >
             <X className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, CreditCard, Check, Sparkles } from 'lucide-react';
 import { CardProfile } from '../types';
 
@@ -15,14 +15,31 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   cards,
   onToggleCard,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wallet-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full sm:max-w-md bg-zinc-900 border border-zinc-800 rounded-t-3xl sm:rounded-2xl max-h-[85vh] flex flex-col shadow-2xl">
         <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-white text-base flex items-center gap-2">
+            <h3 id="wallet-modal-title" className="font-bold text-white text-base flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-blue-400" />
               My Card Wallet
             </h3>
@@ -31,7 +48,9 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close card wallet dialog"
             className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800"
           >
             <X className="w-4 h-4" />
