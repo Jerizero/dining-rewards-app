@@ -1,0 +1,96 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  isOpenNow,
+  formatHours,
+  calculateDistance,
+  formatDistance,
+  calculateBestStack,
+} from '../src/utils/calculator';
+import {
+  getHiddenVenueIds,
+  hideVenue,
+  unhideVenue,
+  resetHiddenVenues,
+} from '../src/utils/storage';
+import type { CardProfile, Venue } from '../src/types';
+
+const baseVenue: Venue = {
+  id: 'v-1',
+  name: 'Test Bistro',
+  neighborhood: 'West Village',
+  cuisine: 'Bistro',
+  priceRange: '$$',
+  address: '123 Bleecker St',
+  lat: 40.7306,
+  lng: -74.0021,
+  tags: [],
+};
+
+const cards: CardProfile[] = [
+  { id: 'amex-gold', name: 'Amex Gold', diningMultiplier: 4, pointType: 'MR', enabled: true },
+  { id: 'bilt', name: 'Bilt', diningMultiplier: 3, rentDayMultiplier: 6, pointType: 'Bilt', enabled: true },
+];
+
+test('isOpenNow respects standard and overnight carry-over windows', () => {
+  const fridayHours = [{ days: [5], openHour: 17, closeHour: 26 }]; // Friday 5 PM -> Sat 2 AM
+  const fri8pm = new Date(2026, 10, 13, 20, 0); // Friday Nov 13 2026
+  const sat1am = new Date(2026, 10, 14, 1, 0);  // Saturday Nov 14 2026
+  const sat11am = new Date(2026, 10, 14, 11, 0);
+  assert.equal(isOpenNow(fridayHours, fri8pm), true);
+  assert.equal(isOpenNow(fridayHours, sat1am), true);
+  assert.equal(isOpenNow(fridayHours, sat11am), false);
+});
+
+test('formatHours formats afternoon and midnight-crossing schedules', () => {
+  assert.equal(formatHours([]), 'Hours variable');
+  assert.equal(formatHours([{ days: [1], openHour: 17.5, closeHour: 23 }]), '5:30 PM to 11:00 PM');
+});
+
+test('calculateDistance and formatDistance compute miles and walk hints', () => {
+  assert.equal(calculateDistance(40.73, -74.0, 40.73, -74.0), 0);
+  assert.equal(formatDistance(0.05), 'Steps away');
+  assert.equal(formatDistance(0.5), '0.5 mi (10 min walk)');
+  assert.equal(formatDistance(1.8), '1.8 mi');
+});
+
+test('calculateBestStack picks highest arbitrage platform and applies Rent Day boost', () => {
+  const overlapped: Venue = {
+    ...baseVenue,
+    inKind: { available: true, bonusPercentage: 20 },
+    seated: { available: true, rewardPercentage: 15, bookingRequired: false },
+    bilt: { available: true, baseMultiplier: 5 },
+  };
+  const regular = calculateBestStack(overlapped, cards, false);
+  assert.equal(regular.primaryPlatform, 'inKind');
+  assert.equal(regular.rawPercentValue, 26);
+  assert.ok(regular.details.some((d) => d.includes('Arbitrage Overlap')));
+
+  const rentDayOnlyBilt = calculateBestStack(
+    { ...baseVenue, bilt: { available: true, baseMultiplier: 5 } },
+    cards,
+    true
+  );
+  assert.equal(rentDayOnlyBilt.primaryPlatform, 'Bilt');
+  assert.match(rentDayOnlyBilt.headline, /Rent Day Peak: Earn 11x/);
+});
+
+test('calculateBestStack falls back to Direct Card when no platform enrolled', () => {
+  const direct = calculateBestStack(baseVenue, cards, false);
+  assert.equal(direct.primaryPlatform, 'Direct Card');
+  assert.equal(direct.rawPercentValue, 6);
+});
+
+test('storage helpers hide, unhide, and reset venues in localStorage', () => {
+  const store = new Map<string, string>();
+  (globalThis as Record<string, unknown>).localStorage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => store.set(k, v),
+    removeItem: (k: string) => store.delete(k),
+  };
+  assert.deepEqual(resetHiddenVenues(), []);
+  assert.deepEqual(hideVenue('v-1'), ['v-1']);
+  assert.deepEqual(hideVenue('v-1'), ['v-1']);
+  assert.deepEqual(getHiddenVenueIds(), ['v-1']);
+  assert.deepEqual(unhideVenue('v-1'), []);
+});
