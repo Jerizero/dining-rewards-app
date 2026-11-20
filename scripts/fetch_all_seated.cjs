@@ -2,7 +2,8 @@ const fs = require('fs');
 const https = require('https');
 const path = require('path');
 
-const outputPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/seated/all_seated_nyc.json';
+const rawDir = process.env.DINING_RAW_DIR || path.resolve(__dirname, '../../dining-rewards-re');
+const outputPath = path.join(rawDir, 'seated/all_seated_nyc.json');
 
 function fetchPage(page) {
   return new Promise((resolve, reject) => {

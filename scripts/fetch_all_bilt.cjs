@@ -2,7 +2,8 @@ const fs = require('fs');
 const https = require('https');
 const path = require('path');
 
-const OUTPUT_FILE = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/bilt/all_bilt_nyc.json';
+const RAW_DIR = process.env.DINING_RAW_DIR || path.resolve(__dirname, '../../dining-rewards-re');
+const OUTPUT_FILE = path.join(RAW_DIR, 'bilt/all_bilt_nyc.json');
 const PAGE_SIZE = 50;
 
 function fetchPage(page) {

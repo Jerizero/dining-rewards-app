@@ -1,11 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const inkindPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/inkind/all_locations.json';
-const seatedPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/seated/all_seated_nyc.json';
-const biltPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/bilt/all_bilt_nyc.json';
-const blackbirdPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/blackbird/harvested_blackbird.json';
-const curatedPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-app/scripts/curated_72_full.ts';
+const rawDir = process.env.DINING_RAW_DIR || path.resolve(__dirname, '../../dining-rewards-re');
+const inkindPath = path.join(rawDir, 'inkind/all_locations.json');
+const seatedPath = path.join(rawDir, 'seated/all_seated_nyc.json');
+const biltPath = path.join(rawDir, 'bilt/all_bilt_nyc.json');
+const blackbirdPath = path.join(rawDir, 'blackbird/harvested_blackbird.json');
+const curatedPath = path.resolve(__dirname, 'curated_72_full.ts');
 
 const inkindRaw = fs.existsSync(inkindPath) ? JSON.parse(fs.readFileSync(inkindPath, 'utf8')) : { locations: [], brands: [], tags: [] };
 const seatedRaw = fs.existsSync(seatedPath) ? JSON.parse(fs.readFileSync(seatedPath, 'utf8')) : [];
@@ -421,6 +422,6 @@ const multiPlatform = finalVenues.filter(v => {
 console.log(`Multi-Platform Arbitrage Spots: ${multiPlatform.length}`);
 
 // Write final combined venues.json
-const jsonOutputPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-app/src/data/venues.json';
+const jsonOutputPath = path.resolve(__dirname, '../src/data/venues.json');
 fs.writeFileSync(jsonOutputPath, JSON.stringify(finalVenues, null, 2), 'utf8');
 console.log(`Wrote ${finalVenues.length} venues to ${jsonOutputPath}`);

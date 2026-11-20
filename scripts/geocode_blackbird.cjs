@@ -1,6 +1,7 @@
 const fs = require('fs');
+const path = require('path');
 
-const venuesPath = '/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-app/src/data/venues.json';
+const venuesPath = path.resolve(__dirname, '../src/data/venues.json');
 const venues = JSON.parse(fs.readFileSync(venuesPath, 'utf8'));
 
 // High precision landmark coordinates for key Blackbird venues

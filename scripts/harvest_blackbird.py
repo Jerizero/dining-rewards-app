@@ -1,10 +1,13 @@
+import os
 import subprocess
 import time
 import xml.etree.ElementTree as ET
 import json
+from pathlib import Path
 
-ADB_DEVICE = "192.168.86.101:40903"
-OUTPUT_FILE = "/Users/jerielacosta/.gemini/antigravity/scratch/dining-rewards-re/blackbird/harvested_blackbird.json"
+ADB_DEVICE = os.environ.get("ADB_DEVICE", "127.0.0.1:5555")
+RAW_DIR = Path(os.environ.get("DINING_RAW_DIR", Path(__file__).resolve().parents[2] / "dining-rewards-re"))
+OUTPUT_FILE = str(RAW_DIR / "blackbird/harvested_blackbird.json")
 
 def adb(cmd):
     full_cmd = f"/opt/homebrew/bin/adb -s {ADB_DEVICE} {cmd}"
