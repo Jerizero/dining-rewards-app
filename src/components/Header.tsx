@@ -23,86 +23,62 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenWalletModal,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-[#0c0c0e]/95 backdrop-blur-md border-b border-white/[0.08] px-4 pt-4 pb-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-baseline gap-2">
-            <h1 className="font-display text-2xl tracking-normal text-white italic">
-              Dining Arbitrage
-            </h1>
-            <span className="text-[10px] font-mono tracking-widest uppercase px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-400 border border-white/[0.08]">
-              NYC
-            </span>
-          </div>
-          <p className="text-[11px] text-zinc-400 mt-0.5 tracking-tight">
-            inKind • Seated • Bilt Dining • Blackbird
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {/* Wallet Setup Button */}
-          <button
-            onClick={onOpenWalletModal}
-            className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition active:scale-95"
-            title="Configure cards"
-          >
-            <CreditCard className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden sm:inline">Wallet</span>
-          </button>
-
-          {/* Hidden Count Button */}
-          {hiddenCount > 0 && (
-            <button
-              onClick={onOpenHiddenModal}
-              className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.08] transition active:scale-95"
-              title="Manage hidden venues"
-            >
-              <EyeOff className="w-3.5 h-3.5" />
-              <span>{hiddenCount}</span>
-            </button>
-          )}
-
-          {/* Near Me GPS Button */}
-          <button
-            onClick={onLocateMe}
-            disabled={locationLoading}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition active:scale-95 ${
-              userLocation
-                ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
-                : 'bg-white/[0.06] hover:bg-white/[0.1] border-white/[0.1] text-zinc-200'
-            }`}
-          >
-            <Navigation className={`w-3.5 h-3.5 ${locationLoading ? 'animate-spin' : ''}`} />
-            <span>{locationLoading ? 'Locating...' : userLocation ? 'Near Me' : 'Near Me'}</span>
-          </button>
-        </div>
+    <header className="sticky top-0 z-40 h-14 bg-[#0B0E14]/95 backdrop-blur-md border-b border-slate-800/90 px-4 flex items-center justify-between gap-2">
+      <div className="flex items-baseline gap-2 min-w-0">
+        <h1 className="font-display text-xl sm:text-2xl tracking-normal text-slate-50 italic truncate">
+          Dining Arbitrage
+        </h1>
+        <span className="text-[10px] font-mono tracking-widest uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
+          NYC
+        </span>
       </div>
 
-      {/* Rent Day Alert Banner */}
-      <div className="mt-3">
+      <div className="flex items-center gap-1.5 shrink-0">
         <button
           onClick={onToggleRentDay}
-          className={`w-full text-left px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition active:scale-[0.99] ${
+          className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border transition active:scale-95 ${
             isRentDay
-              ? 'bg-amber-950/40 border-amber-500/50 text-amber-200 shadow-sm'
-              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:border-white/[0.12]'
+              ? 'bg-amber-500/20 border-amber-400/60 text-amber-200'
+              : 'bg-slate-800/70 border-slate-700/80 text-slate-300 hover:text-white hover:bg-slate-800'
+          }`}
+          title="Bilt Rent Day (1st of month: 2x points up to 1,000 bonus pts)"
+        >
+          <Sparkles className={`w-3.5 h-3.5 ${isRentDay ? 'text-amber-300' : 'text-slate-400'}`} />
+          <span className="hidden sm:inline">{isRentDay ? 'Rent Day 2x' : 'Rent Day'}</span>
+          <span className="sm:hidden">2x</span>
+        </button>
+
+        <button
+          onClick={onOpenWalletModal}
+          className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700/80 text-slate-200 hover:text-white hover:bg-slate-800 transition active:scale-95"
+          title="Configure cards"
+        >
+          <CreditCard className="w-3.5 h-3.5 text-slate-300" />
+          <span className="hidden sm:inline">Wallet</span>
+        </button>
+
+        {hiddenCount > 0 && (
+          <button
+            onClick={onOpenHiddenModal}
+            className="flex items-center gap-1 text-xs font-medium px-2 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700/80 text-slate-300 hover:text-white transition active:scale-95"
+            title="Manage hidden venues"
+          >
+            <EyeOff className="w-3.5 h-3.5" />
+            <span>{hiddenCount}</span>
+          </button>
+        )}
+
+        <button
+          onClick={onLocateMe}
+          disabled={locationLoading}
+          className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition active:scale-95 ${
+            userLocation
+              ? 'bg-sky-500/20 border-sky-400/50 text-sky-200'
+              : 'bg-slate-800/90 hover:bg-slate-700 border-slate-700 text-slate-100'
           }`}
         >
-          <div className="flex items-center gap-2.5 text-xs">
-            <Sparkles className={`w-3.5 h-3.5 shrink-0 ${isRentDay ? 'text-amber-400 animate-pulse' : 'text-zinc-500'}`} />
-            <div>
-              <span className="font-semibold text-white tracking-tight">
-                {isRentDay ? 'Bilt Rent Day Active (Double Points)' : 'Bilt Rent Day Multiplier'}
-              </span>
-              <p className="text-[11px] text-zinc-400 mt-0.5">
-                {isRentDay ? 'Dining partner points doubled up to 16x today.' : 'Spikes on 1st of month. Tap to preview.'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-amber-400">
-            <span className={`w-1.5 h-1.5 rounded-full ${isRentDay ? 'bg-amber-400 animate-ping' : 'bg-zinc-600'}`} />
-            <span>{isRentDay ? 'ACTIVE' : 'OFF'}</span>
-          </div>
+          <Navigation className={`w-3.5 h-3.5 ${locationLoading ? 'animate-spin' : ''}`} />
+          <span>{locationLoading ? '...' : 'Near Me'}</span>
         </button>
       </div>
     </header>

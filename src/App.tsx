@@ -6,7 +6,6 @@ import { VenueDetailModal } from './components/VenueDetailModal';
 import { HiddenPlacesModal } from './components/HiddenPlacesModal';
 import { WalletModal } from './components/WalletModal';
 import { UndoToast } from './components/UndoToast';
-import { PresenceRadar } from './components/PresenceRadar';
 import { VENUES, USER_CARDS } from './data/venues';
 import { CuisineType, Neighborhood, SortMode, CardProfile, Venue } from './types';
 import { isOpenNow, calculateDistance, calculateBestStack } from './utils/calculator';
@@ -220,7 +219,7 @@ export const App: React.FC = () => {
   }, [hiddenIds]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0B0E14] text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
       <Header
         userLocation={userLocation}
@@ -251,18 +250,7 @@ export const App: React.FC = () => {
 
       {/* Main Feed */}
       <main className="flex-1 p-4 max-w-2xl w-full mx-auto pb-24">
-        {/* Presence Detection & Live Location Radar */}
-        <PresenceRadar
-          venues={VENUES}
-          userLocation={userLocation}
-          onLocationUpdate={(loc) => {
-            setUserLocation(loc);
-          }}
-          cards={cards}
-          isRentDay={isRentDay}
-        />
-
-        <div className="flex items-center justify-between text-xs text-zinc-400 mb-3 px-1">
+        <div className="flex items-center justify-between text-xs text-slate-400 mb-3 px-1 flex-wrap gap-1">
           <span>
             Showing <strong className="text-zinc-200">{Math.min(visibleCount, filteredVenues.length)}</strong> of{' '}
             <strong className="text-zinc-200">{filteredVenues.length}</strong> spots

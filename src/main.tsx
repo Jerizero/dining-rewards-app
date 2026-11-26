@@ -3,12 +3,22 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './index.css';
 
-// Register Service Worker for PWA offline readiness
+// Register Service Worker and immediately pick up new deploys without stale-cache stickiness
 if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('Service Worker registration failed:', err);
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!reloaded) {
+        reloaded = true;
+        window.location.reload();
+      }
     });
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => reg.update())
+      .catch((err) => {
+        console.warn('Service Worker registration failed:', err);
+      });
   });
 }
 

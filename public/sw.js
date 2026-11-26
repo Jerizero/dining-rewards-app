@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dining-arbitrage-v2';
+const CACHE_NAME = 'dining-arbitrage-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

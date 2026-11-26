@@ -100,28 +100,28 @@ export const VenueCard: React.FC<VenueCardProps> = ({
     : `Terms ${CATALOG_AS_OF.slice(5).replace('-', '/')}${freshness === 'muted' ? ' · re-verify' : ''}`;
 
   return (
-    <div className="bg-[#141417] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm transition hover:border-white/[0.16]">
+    <div className="bg-[#141923] border border-slate-700/60 rounded-xl overflow-hidden shadow-sm transition hover:border-slate-500/80">
       {/* Top Banner: Venue & Meta */}
       <div className="p-4 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-baseline gap-2.5 flex-wrap">
+            <div className="flex items-baseline gap-2 flex-wrap">
               <a
                 href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-left font-display text-2xl tracking-wide text-white leading-tight hover:text-amber-300 underline decoration-white/20 underline-offset-4 hover:decoration-amber-300 transition"
+                className="text-left font-display text-2xl tracking-wide text-slate-50 leading-tight hover:text-emerald-300 underline decoration-slate-600 underline-offset-4 hover:decoration-emerald-300 transition"
                 title={`Open ${venue.name} in Google Maps`}
               >
                 {venue.name}
               </a>
-              <span className="text-xs text-zinc-500 font-mono font-medium">{venue.priceRange}</span>
-              <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded bg-white/[0.05] text-zinc-300 border border-white/[0.06]">
+              <span className="text-xs text-slate-400 font-mono font-medium">{venue.priceRange}</span>
+              <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700/80">
                 {venue.cuisine}
               </span>
               {venue.rating && (
-                <span className="text-[11px] font-mono text-amber-400/90 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                  ★ {venue.rating.toFixed(1)} {venue.reviewCount ? `(${venue.reviewCount})` : ''}
+                <span className="text-[11px] font-mono text-amber-300">
+                  ★ {venue.rating.toFixed(1)}{venue.reviewCount ? ` (${venue.reviewCount})` : ''}
                 </span>
               )}
             </div>
@@ -170,41 +170,41 @@ export const VenueCard: React.FC<VenueCardProps> = ({
           </p>
         )}
 
-        {/* Platform Offer Badges */}
-        <div className="flex items-center gap-1.5 flex-wrap mt-3 pt-2.5 border-t border-white/[0.06]">
+        {/* Platform Offer Badges (calm slate tags; hero return highlighted below) */}
+        <div className="flex items-center gap-1.5 flex-wrap mt-3 pt-2.5 border-t border-slate-800/80">
           {freshness === 'hidden' ? (
-            <span className="text-[11px] text-zinc-500 italic">{termsLine}</span>
+            <span className="text-[11px] text-slate-400 italic">{termsLine}</span>
           ) : (
           <>
           {venue.inKind?.available && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
+            <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800/90 text-slate-200 border border-slate-700/80">
               inKind {venue.inKind.bonusPercentage}%
             </span>
           )}
 
           {venue.seated?.available && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-950/40 text-sky-300 border border-sky-800/40">
+            <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800/90 text-slate-200 border border-slate-700/80">
               Seated {venue.seated.rewardPercentage}%
             </span>
           )}
 
           {venue.bilt?.available && (
-            <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
+            <span className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded border ${
               isRentDay
-                ? 'bg-amber-950/80 text-amber-200 border-amber-600 font-bold'
-                : 'bg-amber-950/30 text-amber-300 border-amber-800/40'
+                ? 'bg-amber-500/20 text-amber-200 border-amber-400/60 font-semibold'
+                : 'bg-slate-800/90 text-slate-200 border-slate-700/80'
             }`}>
               Bilt {isRentDay ? `${venue.bilt.baseMultiplier + 6}x Rent Day` : `${venue.bilt.baseMultiplier + 3}x`}
             </span>
           )}
 
           {venue.blackbird?.available && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-purple-950/30 text-purple-300 border border-purple-800/40">
+            <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800/90 text-slate-200 border border-slate-700/80">
               Blackbird {venue.blackbird.flyEarn} $FLY
             </span>
           )}
           <span
-            className={`ml-auto text-[10px] font-mono ${freshness === 'muted' ? 'text-amber-500/75' : 'text-zinc-600'}`}
+            className={`ml-auto text-[10px] font-mono ${freshness === 'muted' ? 'text-amber-400' : 'text-slate-500'}`}
             title={termsLine}
           >
             {compactTerms}
@@ -214,30 +214,28 @@ export const VenueCard: React.FC<VenueCardProps> = ({
         </div>
       </div>
 
-      {/* Recommended Strategy Box */}
-      <div className="bg-[#0e0e11] border-t border-white/[0.06] p-3.5">
+      {/* Recommended Strategy Box (single high-contrast emerald focal point) */}
+      <div className="bg-[#10141D] border-t border-slate-800/90 p-3.5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {/* Headline & Value */}
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-xs font-bold text-white tracking-tight">
-                {stack.headline}
-              </span>
-              <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
+              <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/35">
                 {stack.effectiveValue}
+              </span>
+              <span className="text-xs font-semibold text-slate-100 tracking-tight">
+                {stack.headline}
               </span>
             </div>
 
-            {/* How to Claim / Payment Mechanic Badge */}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <div className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded border ${mechanic.bg}`}>
+            <div className="flex items-center gap-2 mt-2 flex-wrap text-[11px] text-slate-300">
+              <span className="inline-flex items-center gap-1 font-medium text-slate-200">
                 {mechanic.icon}
                 <span>{mechanic.label}</span>
-              </div>
-
-              <span className="text-[11px] text-zinc-400 flex items-center gap-1">
-                <CreditCard className="w-3 h-3 text-zinc-500" />
-                Card: <strong className="text-zinc-200 font-medium">{stack.recommendedCard}</strong>
+              </span>
+              <span className="text-slate-600">•</span>
+              <span className="text-slate-300 flex items-center gap-1">
+                <CreditCard className="w-3 h-3 text-slate-400" />
+                <strong className="text-slate-100 font-medium">{stack.recommendedCard}</strong>
               </span>
             </div>
           </div>
