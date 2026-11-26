@@ -76,6 +76,13 @@ export interface BiltReward {
   isNeighborhoodPartner: boolean;
 }
 
+export interface ResyReward {
+  available: boolean;
+  bonusMultiplier: number;      // extra MR points per dollar from Resy Rewards (4)
+  totalMultiplier: number;      // total MR per dollar with an enrolled Amex Gold (8)
+  rewardsTabRequired: boolean;  // must book via the Rewards tab in the Resy iOS app
+}
+
 export interface BlackbirdReward {
   available: boolean;
   flyEarn: number;
@@ -99,6 +106,7 @@ export interface Venue {
   seated?: SeatedReward;
   bilt?: BiltReward;
   blackbird?: BlackbirdReward;
+  resy?: ResyReward;
   tags?: string[];
   rating?: number;
   reviewCount?: number;

@@ -89,6 +89,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
     venue.seated?.available && 'Seated',
     venue.bilt?.available && 'Bilt',
     venue.blackbird?.available && 'Blackbird',
+    venue.resy?.available && 'Resy Rewards',
   ].filter(Boolean) as string[];
   const freshness = freshnessState(CATALOG_AS_OF);
   const termsLine = rewardTermsLine(CATALOG_AS_OF, rewardPrograms);
@@ -201,6 +202,11 @@ export const VenueCard: React.FC<VenueCardProps> = ({
           {venue.blackbird?.available && (
             <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800/90 text-slate-200 border border-slate-700/80">
               Blackbird {venue.blackbird.flyEarn} $FLY
+            </span>
+          )}
+          {venue.resy?.available && (
+            <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800/90 text-slate-200 border border-slate-700/80">
+              Resy Rewards +{venue.resy.bonusMultiplier}x MR
             </span>
           )}
           <span

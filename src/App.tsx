@@ -165,6 +165,7 @@ export const App: React.FC = () => {
       if (platformFilter === 'Seated' && !venue.seated?.available) return false;
       if (platformFilter === 'Bilt' && !venue.bilt?.available) return false;
       if (platformFilter === 'Blackbird' && !venue.blackbird?.available) return false;
+      if (platformFilter === 'Resy Rewards' && !venue.resy?.available) return false;
 
       // 6. Search query
       if (searchQuery.trim()) {

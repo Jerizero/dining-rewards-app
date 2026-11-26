@@ -69,6 +69,7 @@ const PLATFORMS = [
   { value: 'Seated', label: 'Seated' },
   { value: 'Bilt', label: 'Bilt Dining' },
   { value: 'Blackbird', label: 'Blackbird' },
+  { value: 'Resy Rewards', label: 'Resy Rewards' },
 ];
 
 export const FilterBar: React.FC<FilterBarProps> = ({
