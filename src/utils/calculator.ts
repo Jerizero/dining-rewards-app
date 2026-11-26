@@ -80,8 +80,20 @@ export function calculateBestStack(
   const bestRobinhood = pool.find((c) => c.id === 'robinhood');
 
   const biltCardMultiplier = isRentDay ? (bestBiltCard?.rentDayMultiplier || 6) : (bestBiltCard?.diningMultiplier || 3);
-  const defaultCardUsed = bestAmex?.name || bestChase?.name || bestRobinhood?.name || 'Amex Gold / Chase Sapphire';
-  const defaultCardPoints = bestAmex ? `${bestAmex.diningMultiplier}x ${bestAmex.pointType}` : '3x Points';
+  const amexMult = bestAmex?.diningMultiplier || 4;
+  // On non-Rent Days, Amex Gold (4x MR ~8%) beats Bilt Card (3x ~5.4%) and STILL triggers Bilt Neighborhood Dining if linked!
+  const useBiltCard = Boolean(bestBiltCard && (isRentDay || !bestAmex));
+  const bestDiningCard = useBiltCard
+    ? (bestBiltCard?.name || 'Bilt Mastercard')
+    : (bestAmex?.name || bestChase?.name || bestRobinhood?.name || 'Amex Gold');
+  const bestDiningCardShort = useBiltCard ? 'Bilt Card' : (bestAmex ? 'Amex Gold' : bestChase ? 'Chase Sapphire' : bestDiningCard);
+  const bestDiningCardPct = useBiltCard ? Math.round(biltCardMultiplier * 1.8) : (bestAmex ? Math.round(amexMult * 2) : 6);
+  const defaultCardPoints = useBiltCard
+    ? `${biltCardMultiplier}x Bilt Points${isRentDay ? ' (Rent Day 2x, 1k pt cap)' : ''}`
+    : (bestAmex ? `${amexMult}x ${bestAmex.pointType}` : '3x Points');
+
+  const biltDiningBonusPts = venue.bilt?.available ? venue.bilt.baseMultiplier : 0;
+  const biltDiningBonusPct = Math.round(biltDiningBonusPts * 1.8);
 
   const candidates: Recommendation[] = [];
 
@@ -92,69 +104,107 @@ export function calculateBestStack(
     candidates.push({
       primaryPlatform: 'inKind',
       headline: `Save ${bonus}% upfront with inKind`,
-      effectiveValue: `~${rawVal}% Total Return`,
+      directive: `Pay in-app with inKind credit (${bonus}% bonus + card earn on credit purchase)`,
+      effectiveValue: `~${rawVal}% back`,
       rawPercentValue: rawVal,
-      recommendedCard: defaultCardUsed,
+      recommendedCard: bestDiningCard,
       details: [
-        `Pay check with inKind House Account for ${bonus}% bonus credit`,
-        `Stack with ${defaultCardUsed} to earn ${defaultCardPoints} on credit purchase`,
+        `Pay check in the inKind app for ${bonus}% bonus credit`,
+        `Buy discounted inKind credit (e.g. Costco / promos) with ${bestDiningCardShort} to stack upfront savings`,
       ],
     });
   }
 
-  // 2. Seated
+  // 2. Seated (stacks automatically with card earn + Bilt Neighborhood Dining when linked!)
   if (venue.seated?.available) {
     const reward = venue.seated.rewardPercentage;
-    const rawVal = reward + 6;
+    const stackBilt = biltDiningBonusPts > 0;
+    const rawVal = reward + bestDiningCardPct + (stackBilt ? biltDiningBonusPct : 0);
+    const cardClause = stackBilt
+      ? `${bestDiningCardShort} (linked in Bilt for +${biltDiningBonusPts}x)`
+      : bestDiningCardShort;
+    const directive = venue.seated.bookingRequired
+      ? `Book via Seated, pay with ${cardClause}, upload receipt`
+      : `Pay with ${cardClause}, then upload receipt to Seated`;
+    const details = [
+      `${reward}% back via Seated in brand gift cards (Amazon, Lyft, Uber)`,
+      `${defaultCardPoints} from ${bestDiningCardShort}`,
+    ];
+    if (stackBilt) {
+      details.push(`+${biltDiningBonusPts}x Bilt Neighborhood Dining bonus auto-stacks when ${bestDiningCardShort} is linked in Bilt Wallet`);
+    }
     candidates.push({
       primaryPlatform: 'Seated',
       headline: `Get ${reward}% back via Seated`,
-      effectiveValue: `~${rawVal}% Total Return`,
+      directive,
+      effectiveValue: `~${rawVal}% back`,
       rawPercentValue: rawVal,
-      recommendedCard: defaultCardUsed,
+      recommendedCard: bestDiningCard,
+      details,
+    });
+  }
+
+  // 3. Resy Rewards (+4x MR with enrolled Amex Gold = 8x total, stackable with Bilt Neighborhood Dining)
+  if (venue.resyRewards?.available) {
+    const resyBonus = venue.resyRewards.bonusMultiplier || 4;
+    const totalMr = (bestAmex ? amexMult : 4) + resyBonus;
+    const rawVal = Math.round(totalMr * 2) + (biltDiningBonusPts > 0 ? biltDiningBonusPct : 0);
+    const biltClause = biltDiningBonusPts > 0 ? ` (+${biltDiningBonusPts}x Bilt if linked)` : '';
+    candidates.push({
+      primaryPlatform: 'Resy Rewards',
+      headline: `Earn ${totalMr}x Amex MR via Resy Rewards`,
+      directive: `Book in Resy iOS Rewards tab, pay with enrolled Amex Gold${biltClause}`,
+      effectiveValue: `${totalMr}x MR (~${rawVal}%)`,
+      rawPercentValue: rawVal,
+      recommendedCard: 'American Express Gold',
       details: [
-        `Upload receipt or book via Seated for ${reward}% back in brand gift cards (Amazon, Lyft)`,
-        `Pay with ${defaultCardUsed} for an additional ${defaultCardPoints}`,
-        venue.seated.bookingRequired ? 'Requires reservation booking through Seated' : 'Walk-ins accepted (upload receipt)',
+        `Enroll Amex Gold in Resy Rewards and book via the Resy Rewards tab for +${resyBonus}x bonus MR on food & beverage`,
+        `Stacks with standard 4x Amex Gold dining = ${totalMr}x Membership Rewards`,
       ],
     });
   }
 
-  // 3. Bilt
+  // 4. Bilt Neighborhood Dining (auto-stacks with ANY linked card — Amex Gold 4x + Bilt bonus beats Bilt Card 3x on non-Rent Days!)
   if (venue.bilt?.available) {
     const basePts = venue.bilt.baseMultiplier;
-    const totalPts = basePts + biltCardMultiplier;
-    // Bilt points valued conservatively at 1.8c each
-    const rawVal = Math.round(totalPts * 1.8);
+    const cardMult = useBiltCard ? biltCardMultiplier : amexMult;
+    const totalPts = basePts + cardMult;
+    const rawVal = Math.round(basePts * 1.8) + bestDiningCardPct;
+    const directive = useBiltCard
+      ? `Pay with Bilt Card (${isRentDay ? 'Rent Day 2x, 1k bonus pt cap' : `${totalPts}x total Bilt pts`})`
+      : `Pay with ${bestDiningCardShort} linked in Bilt Wallet (${amexMult}x MR + ${basePts}x Bilt)`;
     candidates.push({
       primaryPlatform: 'Bilt',
-      headline: isRentDay 
-        ? `Rent Day Peak: Earn ${totalPts}x Bilt Points today!`
-        : `Earn ${totalPts}x total Bilt Points on dining`,
-      effectiveValue: `${totalPts}x Points (~${rawVal}%)`,
+      headline: isRentDay
+        ? `Rent Day Peak: ${totalPts}x Bilt Points`
+        : `${totalPts}x combined (${bestDiningCardShort} + Bilt Dining)`,
+      directive,
+      effectiveValue: `${totalPts}x (~${rawVal}%)`,
       rawPercentValue: rawVal,
-      recommendedCard: 'Bilt Mastercard (or any linked card in Bilt Wallet)',
+      recommendedCard: bestDiningCard,
       details: [
-        `Earns ${basePts}x Bilt Dining bonus points`,
-        `Earns ${biltCardMultiplier}x from Bilt Card (${isRentDay ? 'Double Points on Rent Day, capped at 1,000 bonus pts / ~$333 spend' : '3x standard dining'})`,
-        'Points transfer 1:1 to Hyatt, United, and top airline programs',
+        `+${basePts}x Bilt Neighborhood Dining bonus automatically via linked card`,
+        useBiltCard
+          ? `Earns ${biltCardMultiplier}x from Bilt Card (${isRentDay ? 'Double Points on Rent Day, capped at 1,000 bonus pts / ~$333 spend' : '3x standard dining'})`
+          : `Earns ${amexMult}x Amex MR from linked Amex Gold (beats 3x Bilt Card on non-Rent Days)`,
       ],
     });
   }
 
-  // 4. Blackbird
+  // 5. Blackbird
   if (venue.blackbird?.available) {
     const fly = venue.blackbird.flyEarn;
+    const rawVal = 12 + (biltDiningBonusPts > 0 ? biltDiningBonusPct : 0);
     candidates.push({
       primaryPlatform: 'Blackbird',
       headline: `Earn ${fly} $FLY + In-app perk`,
-      effectiveValue: `${fly} $FLY + Perk (~12%)`,
-      rawPercentValue: 12,
-      recommendedCard: defaultCardUsed,
+      directive: `Tap Blackbird puck at host/table, pay with ${bestDiningCardShort}`,
+      effectiveValue: `${fly} $FLY (~${rawVal}%)`,
+      rawPercentValue: rawVal,
+      recommendedCard: bestDiningCard,
       details: [
-        `Check-in via Blackbird at table/counter to earn ${fly} $FLY tokens`,
-        venue.blackbird.perkTitle ? `Perk: ${venue.blackbird.perkTitle}` : 'Qualifies for status level tier advancement',
-        `Pay directly with ${defaultCardUsed} for max points`,
+        `Check in via Blackbird at table/counter to earn ${fly} $FLY`,
+        venue.blackbird.perkTitle ? `Perk: ${venue.blackbird.perkTitle}` : 'Counts toward Blackbird status perks',
       ],
     });
   }
@@ -164,12 +214,13 @@ export function calculateBestStack(
     return {
       primaryPlatform: 'Direct Card',
       headline: 'Pay directly with highest multiplier card',
-      effectiveValue: '4x Points / 3% Cash',
-      rawPercentValue: 6,
-      recommendedCard: bestAmex?.name || 'Amex Gold (4x Dining)',
+      directive: `Pay directly with ${bestDiningCardShort} (${defaultCardPoints})`,
+      effectiveValue: `~${bestDiningCardPct}% back`,
+      rawPercentValue: bestDiningCardPct,
+      recommendedCard: bestDiningCard,
       details: [
-        'Not currently enrolled on inKind, Seated, or Bilt',
-        'Use Amex Gold for 4x Membership Rewards or Chase Sapphire for 3x Ultimate Rewards',
+        'Not currently enrolled on inKind, Seated, Bilt, or Blackbird',
+        `Use ${bestDiningCardShort} for ${defaultCardPoints}`,
       ],
     };
   }
@@ -181,7 +232,7 @@ export function calculateBestStack(
   // If there are other available platforms, append arbitrage comparison note!
   if (candidates.length > 1) {
     const runnersUp = candidates.slice(1).map((c) => `${c.primaryPlatform} (${c.effectiveValue})`).join(', ');
-    winner.details.push(`⚡ Arbitrage Overlap: Also listed on ${runnersUp}.`);
+    winner.details.push(`Also on: ${runnersUp}.`);
   }
 
   return winner;

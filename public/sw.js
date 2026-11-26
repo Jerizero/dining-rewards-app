@@ -1,45 +1,20 @@
-const CACHE_NAME = 'dining-arbitrage-v3';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.svg'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
+// Self-unregistering cleanup worker: purges any stuck v1/v2 caches so users always receive
+// the latest live Vercel deploy immediately without stale catalog stickiness.
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      )
-    )
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then((clients) => {
+        for (const client of clients) {
+          client.navigate(client.url);
+        }
+      })
   );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', (event) => {
-  // Network-first so deploys and live catalog refreshes appear immediately on refresh;
-  // fall back to cache only when offline.
-  if (event.request.method === 'GET') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const cacheCopy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cacheCopy));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-  }
 });

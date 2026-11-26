@@ -3,22 +3,22 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './index.css';
 
-// Register Service Worker and immediately pick up new deploys without stale-cache stickiness
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// Unregister any stale PWA service worker and clear legacy caches so live catalog deploys
+// appear immediately on every device.
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    let reloaded = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!reloaded) {
-        reloaded = true;
-        window.location.reload();
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      for (const reg of regs) {
+        reg.unregister().catch(() => {});
       }
     });
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => reg.update())
-      .catch((err) => {
-        console.warn('Service Worker registration failed:', err);
+    if ('caches' in window) {
+      caches.keys().then((keys) => {
+        for (const key of keys) {
+          caches.delete(key).catch(() => {});
+        }
       });
+    }
   });
 }
 

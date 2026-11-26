@@ -38,10 +38,10 @@ export function venueNextActions(venue: Venue, mapsUrl: string): ProgramAction[]
       url: venue.bookingUrl,
     });
   }
-  if (venue.resy?.available) {
+  if (venue.resyRewards?.available) {
     out.push({
       program: 'Resy Rewards',
-      action: `Book through the Rewards tab in the Resy app and pay with an enrolled Amex Gold to earn ${venue.resy.totalMultiplier}x MR total (${venue.resy.bonusMultiplier}x Resy Rewards bonus stacks on the card's dining rate).`,
+      action: `Book through the Rewards tab in the Resy app and pay with an enrolled Amex Gold to earn 8x MR total (${venue.resyRewards.bonusMultiplier}x Resy Rewards bonus stacks on the card's dining rate).`,
       url: venue.bookingUrl,
     });
   }

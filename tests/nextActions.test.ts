@@ -19,7 +19,7 @@ const base = {
 test('Resy Rewards venue gets an 8x Amex Gold directive via the Rewards tab', () => {
   const venue = {
     ...base,
-    resy: { available: true, bonusMultiplier: 4, totalMultiplier: 8, rewardsTabRequired: true },
+    resyRewards: { available: true, bonusMultiplier: 4 },
   } as unknown as Venue;
   const actions = venueNextActions(venue, 'https://maps.example.com');
   const resy = actions.find((a) => a.program === 'Resy Rewards');

@@ -138507,11 +138507,9 @@
       "resy rewards"
     ],
     "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Pavillon%20Midtown%20New%20York",
-    "resy": {
+    "resyRewards": {
       "available": true,
-      "bonusMultiplier": 4,
-      "totalMultiplier": 8,
-      "rewardsTabRequired": true
+      "bonusMultiplier": 4
     }
   },
   {

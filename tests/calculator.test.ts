@@ -54,31 +54,42 @@ test('calculateDistance and formatDistance compute miles and walk hints', () => 
   assert.equal(formatDistance(1.8), '1.8 mi');
 });
 
-test('calculateBestStack picks highest arbitrage platform and applies Rent Day boost', () => {
+test('calculateBestStack picks highest arbitrage platform (incl. Seated+Bilt+Amex triple-stack) and applies Rent Day boost', () => {
   const overlapped: Venue = {
     ...baseVenue,
     inKind: { available: true, bonusPercentage: 20 },
     seated: { available: true, rewardPercentage: 15, bookingRequired: false },
-    bilt: { available: true, baseMultiplier: 5 },
+    bilt: { available: true, baseMultiplier: 5, isNeighborhoodPartner: true },
   };
   const regular = calculateBestStack(overlapped, cards, false);
-  assert.equal(regular.primaryPlatform, 'inKind');
-  assert.equal(regular.rawPercentValue, 26);
-  assert.ok(regular.details.some((d) => d.includes('Arbitrage Overlap')));
+  // Seated (15%) + Amex Gold 4x (8%) + Bilt Neighborhood Dining 5x (9%) = 32% beats inKind (26%)
+  assert.equal(regular.primaryPlatform, 'Seated');
+  assert.equal(regular.rawPercentValue, 32);
+  assert.match(regular.directive, /linked in Bilt/i);
+  assert.ok(regular.details.some((d) => d.includes('Also on:')));
 
   const rentDayOnlyBilt = calculateBestStack(
-    { ...baseVenue, bilt: { available: true, baseMultiplier: 5 } },
+    { ...baseVenue, bilt: { available: true, baseMultiplier: 5, isNeighborhoodPartner: true } },
     cards,
     true
   );
   assert.equal(rentDayOnlyBilt.primaryPlatform, 'Bilt');
-  assert.match(rentDayOnlyBilt.headline, /Rent Day Peak: Earn 11x/);
+  assert.match(rentDayOnlyBilt.headline, /Rent Day Peak: 11x/);
+
+  const resyVenue = calculateBestStack(
+    { ...baseVenue, resyRewards: { available: true, bonusMultiplier: 4 } },
+    cards,
+    false
+  );
+  assert.equal(resyVenue.primaryPlatform, 'Resy Rewards');
+  assert.equal(resyVenue.rawPercentValue, 16);
+  assert.match(resyVenue.directive, /Resy iOS Rewards tab/i);
 });
 
 test('calculateBestStack falls back to Direct Card when no platform enrolled', () => {
   const direct = calculateBestStack(baseVenue, cards, false);
   assert.equal(direct.primaryPlatform, 'Direct Card');
-  assert.equal(direct.rawPercentValue, 6);
+  assert.equal(direct.rawPercentValue, 8);
 });
 
 test('storage helpers hide, unhide, and reset venues in localStorage', () => {

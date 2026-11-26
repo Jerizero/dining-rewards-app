@@ -42,7 +42,7 @@ export const VenueDetailModal: React.FC<VenueDetailModalProps> = ({
       venue.seated?.available && 'Seated',
       venue.bilt?.available && 'Bilt',
       venue.blackbird?.available && 'Blackbird',
-      venue.resy?.available && 'Resy Rewards',
+      venue.resyRewards?.available && 'Resy Rewards',
     ].filter(Boolean) as string[]
   );
 
