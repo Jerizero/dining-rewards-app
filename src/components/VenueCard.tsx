@@ -275,15 +275,15 @@ export const VenueCard: React.FC<VenueCardProps> = ({
                 {formatHours(venue.hours)}
               </span>
 
-              <a
-                href={mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-semibold text-zinc-200 hover:text-white px-2.5 py-1 rounded bg-white/[0.08] hover:bg-white/[0.12] transition active:scale-95"
-              >
-                <Navigation className="w-3 h-3 text-blue-400" />
-                <span>Directions</span>
-              </a>
+              {onShowDetails && (
+                <button
+                  type="button"
+                  onClick={() => onShowDetails(venue)}
+                  className="inline-flex items-center gap-1 font-semibold text-zinc-200 hover:text-white px-2.5 py-1 rounded bg-white/[0.08] hover:bg-white/[0.12] transition active:scale-95"
+                >
+                  All programs
+                </button>
+              )}
             </div>
           </div>
         )}
