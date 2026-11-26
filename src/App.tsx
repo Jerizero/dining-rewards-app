@@ -2,12 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { VenueCard } from './components/VenueCard';
+import { VenueDetailModal } from './components/VenueDetailModal';
 import { HiddenPlacesModal } from './components/HiddenPlacesModal';
 import { WalletModal } from './components/WalletModal';
 import { UndoToast } from './components/UndoToast';
 import { PresenceRadar } from './components/PresenceRadar';
 import { VENUES, USER_CARDS } from './data/venues';
-import { CuisineType, Neighborhood, SortMode, CardProfile } from './types';
+import { CuisineType, Neighborhood, SortMode, CardProfile, Venue } from './types';
 import { isOpenNow, calculateDistance, calculateBestStack } from './utils/calculator';
 import { locationOutcome, requestLocation } from './utils/location';
 import { getHiddenVenueIds, hideVenue, unhideVenue, resetHiddenVenues } from './utils/storage';
@@ -48,6 +49,7 @@ export const App: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationNotice, setLocationNotice] = useState<string | null>(null);
+  const [detailVenue, setDetailVenue] = useState<Venue | null>(null);
 
   // Pagination / Virtual lazy slice for 1,300+ venues
   const [visibleCount, setVisibleCount] = useState(40);
@@ -305,6 +307,7 @@ export const App: React.FC = () => {
                 isRentDay={isRentDay}
                 distance={distance}
                 onHideVenue={handleHideVenue}
+                onShowDetails={setDetailVenue}
               />
             ))}
 
@@ -334,6 +337,12 @@ export const App: React.FC = () => {
       )}
 
       {/* Hidden Places Management Bottom Sheet */}
+      <VenueDetailModal
+        venue={detailVenue}
+        userCards={cards}
+        isRentDay={isRentDay}
+        onClose={() => setDetailVenue(null)}
+      />
       <HiddenPlacesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
