@@ -16,61 +16,7 @@ const blackbirdRaw = fs.existsSync(blackbirdPath) ? JSON.parse(fs.readFileSync(b
 const brandsMap = new Map((inkindRaw.brands || []).map(b => [b.slug, b]));
 const tagsMap = new Map((inkindRaw.tags || []).map(t => [t.id, t.name]));
 
-function getNeighborhood(lat, lng, address = '', city = '') {
-  const addr = (address || '').toLowerCase();
-  const c = (city || '').toLowerCase();
-
-  // Manhattan
-  if (lat >= 40.700 && lat <= 40.880 && lng >= -74.025 && lng <= -73.910 && (c.includes('new york') || c.includes('manhattan') || c === '')) {
-    if (lat < 40.718) return 'Tribeca & FiDi';
-    if (lat >= 40.718 && lat < 40.728 && lng < -73.998) return 'SoHo';
-    if (lat >= 40.718 && lat < 40.728 && lng >= -73.998 && lng < -73.992) return 'Nolita';
-    if (lat >= 40.712 && lat < 40.725 && lng >= -73.992) return 'Lower East Side';
-    if (lat >= 40.728 && lat < 40.738 && lng < -73.998) return 'West Village';
-    if (lat >= 40.725 && lat < 40.738 && lng >= -73.998) return 'East Village';
-    if (lat >= 40.738 && lat < 40.750 && lng < -73.995) return 'Chelsea';
-    if (lat >= 40.738 && lat < 40.750 && lng >= -73.995) return 'Flatiron & NoMad';
-    if (lat >= 40.750 && lat < 40.772 && lng < -73.985) return "Hell's Kitchen";
-    if (lat >= 40.750 && lat < 40.772 && lng >= -73.985) return 'Midtown';
-    if (lat >= 40.772 && lat < 40.820 && lng < -73.960) return 'Upper West Side';
-    if (lat >= 40.772 && lat < 40.820 && lng >= -73.960) return 'Upper East Side';
-    if (lat >= 40.820) return 'Harlem';
-    return 'Midtown';
-  }
-
-  // Brooklyn
-  if (c.includes('brooklyn') || (lat >= 40.570 && lat < 40.740 && lng >= -74.040 && lng < -73.850)) {
-    if (lat >= 40.722 && lat <= 40.740 && lng >= -73.965 && lng <= -73.935) return 'Greenpoint';
-    if (lat >= 40.700 && lat < 40.722 && lng >= -73.970 && lng <= -73.935) return 'Williamsburg';
-    if (lat >= 40.690 && lat < 40.710 && lng < -73.985) return 'DUMBO & Heights';
-    if (lat >= 40.660 && lat < 40.690 && lng < -73.960) return 'Park Slope & Boerum Hill';
-    if (lat >= 40.675 && lat < 40.710 && lng >= -73.945 && lng < -73.900) return 'Bushwick';
-    return 'Brooklyn';
-  }
-
-  // Queens
-  if (c.includes('astoria') || (lat >= 40.750 && lat <= 40.785 && lng >= -73.940 && lng <= -73.900)) return 'Astoria';
-  if (c.includes('long island city') || (lat >= 40.735 && lat < 40.755 && lng >= -73.960 && lng <= -73.925)) return 'Long Island City';
-  if (c.includes('queens') || (lat >= 40.700 && lat <= 40.780 && lng >= -73.920 && lng <= -73.720)) return 'Queens';
-
-  if (c.includes('bronx')) return 'The Bronx';
-  if (c.includes('staten island')) return 'Staten Island';
-
-  return 'Midtown';
-}
-
-function getCuisine(text = '') {
-  const t = text.toLowerCase();
-  if (t.includes('sushi') || t.includes('japanese') || t.includes('ramen') || t.includes('omakase') || t.includes('izakaya')) return 'Japanese';
-  if (t.includes('pasta') || t.includes('italian') || t.includes('pizza') || t.includes('trattoria') || t.includes('gelato')) return 'Italian';
-  if (t.includes('taco') || t.includes('mexican') || t.includes('cantina') || t.includes('burrito') || t.includes('taqueria') || t.includes('latin')) return 'Mexican';
-  if (t.includes('french') || t.includes('bistro') || t.includes('brasserie') || t.includes('crepe')) return 'French';
-  if (t.includes('korean') || t.includes('k-bbq') || t.includes('kbbq')) return 'Korean';
-  if (t.includes('greek') || t.includes('mediterranean') || t.includes('tapas') || t.includes('spanish') || t.includes('hummus') || t.includes('falafel') || t.includes('middle eastern')) return 'Mediterranean';
-  if (t.includes('coffee') || t.includes('cafe') || t.includes('bakery') || t.includes('pastry') || t.includes('donut') || t.includes('bagel')) return 'Bakery & Coffee';
-  if (t.includes('cocktail') || t.includes('wine bar') || t.includes('speakeasy') || t.includes('brewery') || t.includes('bar ') || t.endsWith(' bar') || t.includes('pub') || t.includes('lounge')) return 'Cocktails & Bar';
-  return 'American';
-}
+const { getNeighborhood, getCuisine } = require('./classifier.cjs');
 
 function getPriceRange(ratingOrStr) {
   if (typeof ratingOrStr === 'number') {

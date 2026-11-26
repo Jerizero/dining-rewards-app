@@ -7,6 +7,15 @@ export type CuisineType =
   | 'Mexican'
   | 'Mediterranean'
   | 'Korean'
+  | 'Indian'
+  | 'Thai'
+  | 'Chinese'
+  | 'Vietnamese'
+  | 'Steakhouse'
+  | 'Seafood'
+  | 'Greek'
+  | 'Spanish'
+  | 'Middle Eastern'
   | 'Cocktails & Bar'
   | 'Bakery & Coffee';
 
@@ -20,6 +29,7 @@ export type Neighborhood =
   | 'Flatiron'
   | 'Flatiron & NoMad'
   | 'Nolita'
+  | 'Chinatown & Little Italy'
   | 'Chelsea'
   | 'Greenpoint'
   | 'Midtown'
