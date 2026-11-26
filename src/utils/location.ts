@@ -15,7 +15,7 @@ export interface LocationOutcome {
 }
 
 export const LOCATION_OFF_NOTICE =
-  'Location is off - showing every spot sorted by reward, not distance. Allow location access and try again to sort by what is nearest.';
+  'Location is off - the full list stays in its current order. Allow location access and try again to sort by what is nearest.';
 
 export function locationOutcome(result: LocationResult): LocationOutcome {
   if (result.kind === 'granted') {
