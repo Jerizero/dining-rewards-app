@@ -124,10 +124,17 @@ export const VenueCard: React.FC<VenueCardProps> = ({
             </div>
 
             <div className="flex items-center gap-2 mt-2 text-xs text-zinc-400 flex-wrap">
-              <span className="text-zinc-200 font-medium flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-zinc-200 hover:text-amber-300 font-medium inline-flex items-center gap-1 underline decoration-white/20 underline-offset-2 hover:decoration-amber-300 transition"
+                title={`Open ${venue.name} in Google Maps`}
+              >
+                <MapPin className="w-3.5 h-3.5 text-amber-400/80 shrink-0" />
                 {venue.neighborhood}
-              </span>
+              </a>
 
               {distance !== undefined && (
                 <>

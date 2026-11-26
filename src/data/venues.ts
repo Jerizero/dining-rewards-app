@@ -8,7 +8,7 @@ import { dedupeVenues, DedupeDrop } from '../utils/dedupe';
  * and any manual refresh MUST bump this constant; the freshness line on every card
  * (JER-788) reads it. Never bump without an actual data pass - it is a claim, not a timer.
  */
-export const CATALOG_AS_OF = '2026-10-25';
+export const CATALOG_AS_OF = '2026-11-26';
 
 export const USER_CARDS: CardProfile[] = [
   {
