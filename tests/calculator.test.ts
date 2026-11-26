@@ -199,3 +199,38 @@ test('the shipped catalog drops the Pesce Lulu duplicate and keeps the 53rd St r
   assert.equal(VENUES.length + VENUE_DEDUPE_DROPS.length, 3499);
   assert.ok(VENUE_DEDUPE_DROPS.some(d => d.droppedId === 'pesce-lulu-seafood-kitchen-nyc'));
 });
+
+// JER-788 piece 4: one next action per available program
+import { venueNextActions } from '../src/utils/nextActions';
+
+test('next actions cover each available program with its own number, directions always present', () => {
+  const venue = {
+    id: 'v1', name: 'Test Spot', neighborhood: 'Soho', address: '1 Spring St', lat: 40.7, lng: -74.0,
+    cuisine: 'Italian', priceRange: '$$', description: '', hours: [],
+    inKind: { available: true, bonusPercentage: 20 },
+    seated: { available: true, rewardPercentage: 15, bookingRequired: true },
+    bilt: { available: true, baseMultiplier: 5, isNeighborhoodPartner: true },
+    blackbird: { available: true, flyEarn: 50 },
+    bookingUrl: 'https://example.test/book',
+  };
+  const acts = venueNextActions(venue, 'https://maps.test/v1');
+  const byProgram = Object.fromEntries(acts.map(a => [a.program, a]));
+  assert.match(byProgram.inKind.action, /20%/);
+  assert.match(byProgram.Seated.action, /Book through Seated/);
+  assert.match(byProgram.Seated.action, /15%/);
+  assert.equal(byProgram.Seated.url, 'https://example.test/book');
+  assert.match(byProgram.Bilt.action, /neighborhood partner/);
+  assert.match(byProgram.Bilt.action, /5x/);
+  assert.match(byProgram.Blackbird.action, /50 \$FLY/);
+  assert.equal(byProgram.Go.url, 'https://maps.test/v1');
+  assert.equal(byProgram.Book.url, 'https://example.test/book');
+});
+
+test('venue with no programs still gets directions, and no booking action without a bookingUrl', () => {
+  const venue = {
+    id: 'v2', name: 'Plain Spot', neighborhood: 'Soho', address: '2 Spring St', lat: 40.7, lng: -74.0,
+    cuisine: 'Cafe', priceRange: '$', description: '', hours: [],
+  };
+  const acts = venueNextActions(venue, 'https://maps.test/v2');
+  assert.deepEqual(acts.map(a => a.program), ['Go']);
+});
