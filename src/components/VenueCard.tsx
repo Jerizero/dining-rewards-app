@@ -3,6 +3,7 @@ import {
   MapPin, 
   Clock, 
   EyeOff, 
+  Flag,
   CreditCard, 
   ChevronDown, 
   ChevronUp, 
@@ -23,6 +24,7 @@ interface VenueCardProps {
   isRentDay: boolean;
   distance?: number;
   onHideVenue: (id: string) => void;
+  onFlagVenue?: (venue: Venue) => void;
   onShowDetails?: (venue: Venue) => void;
 }
 
@@ -32,6 +34,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
   isRentDay,
   distance,
   onHideVenue,
+  onFlagVenue,
   onShowDetails,
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -154,14 +157,29 @@ export const VenueCard: React.FC<VenueCardProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={() => onHideVenue(venue.id)}
-            className="p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05] rounded-lg transition active:scale-95 shrink-0"
-            title="Hide this place"
-            aria-label={`Hide ${venue.name}`}
-          >
-            <EyeOff className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-0.5 shrink-0">
+            {onFlagVenue && (
+              <button
+                type="button"
+                onClick={() => onFlagVenue(venue)}
+                className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium text-slate-400 hover:text-amber-300 hover:bg-white/[0.05] rounded-lg transition active:scale-95"
+                title="Flag wrong data or improve"
+                aria-label={`Flag ${venue.name}`}
+              >
+                <Flag className="w-3.5 h-3.5" />
+                <span>Flag</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onHideVenue(venue.id)}
+              className="p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05] rounded-lg transition active:scale-95 shrink-0"
+              title="Hide this place"
+              aria-label={`Hide ${venue.name}`}
+            >
+              <EyeOff className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {editorialDesc && (
