@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dining-arbitrage-v1';
+const CACHE_NAME = 'dining-arbitrage-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -27,21 +27,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Stale-while-revalidate for local app shell
+  // Network-first so deploys and live catalog refreshes appear immediately on refresh;
+  // fall back to cache only when offline.
   if (event.request.method === 'GET') {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        const networked = fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const cacheCopy = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cacheCopy));
-            }
-            return response;
-          })
-          .catch(() => cached);
-        return cached || networked;
-      })
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const cacheCopy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cacheCopy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
     );
   }
 });

@@ -106,12 +106,15 @@ export const VenueCard: React.FC<VenueCardProps> = ({
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2.5 flex-wrap">
-              <button
-                onClick={() => onShowDetails?.(venue)}
-                className="text-left font-display text-2xl tracking-wide text-white leading-tight hover:text-emerald-300 transition"
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-left font-display text-2xl tracking-wide text-white leading-tight hover:text-amber-300 underline decoration-white/20 underline-offset-4 hover:decoration-amber-300 transition"
+                title={`Open ${venue.name} in Google Maps`}
               >
                 {venue.name}
-              </button>
+              </a>
               <span className="text-xs text-zinc-500 font-mono font-medium">{venue.priceRange}</span>
               <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded bg-white/[0.05] text-zinc-300 border border-white/[0.06]">
                 {venue.cuisine}
