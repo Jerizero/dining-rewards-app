@@ -94,3 +94,33 @@ test('storage helpers hide, unhide, and reset venues in localStorage', () => {
   assert.deepEqual(getHiddenVenueIds(), ['v-1']);
   assert.deepEqual(unhideVenue('v-1'), []);
 });
+
+// JER-788: reward terms freshness thresholds and captions
+import {
+  freshnessState,
+  catalogAgeDays,
+  rewardTermsLine,
+} from '../src/utils/freshness';
+
+test('freshness thresholds: fresh to 14d, muted to 45d, hidden after', () => {
+  const now = new Date('2026-11-26T12:00:00Z');
+  assert.equal(freshnessState('2026-11-26', now), 'fresh');
+  assert.equal(freshnessState('2026-11-12', now), 'fresh');   // exactly 14d
+  assert.equal(freshnessState('2026-11-11', now), 'muted');   // 15d
+  assert.equal(freshnessState('2026-10-12', now), 'muted');   // exactly 45d
+  assert.equal(freshnessState('2026-10-11', now), 'hidden');  // 46d
+  assert.equal(catalogAgeDays('2026-12-01', now), 0);         // clock skew never negative
+});
+
+test('terms line: muted flags staleness, hidden withholds numbers and names the date', () => {
+  const now = new Date('2026-11-26T12:00:00Z');
+  const fresh = rewardTermsLine('2026-11-20', ['inKind', 'Bilt'], now);
+  assert.match(fresh, /as of Nov 20, 2026/);
+  assert.match(fresh, /inKind \/ Bilt/);
+  assert.doesNotMatch(fresh, /stale/);
+  const muted = rewardTermsLine('2026-10-25', ['Seated'], now);
+  assert.match(muted, /may be stale/);
+  const hidden = rewardTermsLine('2026-09-01', ['Seated'], now);
+  assert.match(hidden, /too stale to show/);
+  assert.match(hidden, /Sep 1, 2026/);
+});

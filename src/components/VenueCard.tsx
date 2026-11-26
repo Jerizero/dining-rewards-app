@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Venue, CardProfile } from '../types';
 import { isOpenNow, formatHours, formatDistance, calculateBestStack } from '../utils/calculator';
+import { freshnessState, rewardTermsLine } from '../utils/freshness';
+import { CATALOG_AS_OF } from '../data/venues';
 
 interface VenueCardProps {
   venue: Venue;
@@ -78,6 +80,17 @@ export const VenueCard: React.FC<VenueCardProps> = ({
 
   const mechanic = getMechanicBadge();
 
+  // JER-788: reward numbers always carry their data age and source; too-stale terms
+  // are withheld instead of shown as bare numbers.
+  const rewardPrograms = [
+    venue.inKind?.available && 'inKind',
+    venue.seated?.available && 'Seated',
+    venue.bilt?.available && 'Bilt',
+    venue.blackbird?.available && 'Blackbird',
+  ].filter(Boolean) as string[];
+  const freshness = freshnessState(CATALOG_AS_OF);
+  const termsLine = rewardTermsLine(CATALOG_AS_OF, rewardPrograms);
+
   return (
     <div className="bg-[#141417] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm transition hover:border-white/[0.16]">
       {/* Top Banner: Venue & Meta */}
@@ -136,6 +149,10 @@ export const VenueCard: React.FC<VenueCardProps> = ({
 
         {/* Platform Offer Badges */}
         <div className="flex items-center gap-1.5 flex-wrap mt-3.5 pt-3 border-t border-white/[0.06]">
+          {freshness === 'hidden' ? (
+            <span className="text-[11px] text-zinc-500 italic">{termsLine}</span>
+          ) : (
+          <>
           {venue.inKind?.available && (
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
               inKind {venue.inKind.bonusPercentage}% Bonus
@@ -162,6 +179,11 @@ export const VenueCard: React.FC<VenueCardProps> = ({
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-purple-950/30 text-purple-300 border border-purple-800/40">
               Blackbird {venue.blackbird.flyEarn} $FLY
             </span>
+          )}
+          <span className={`basis-full text-[10px] mt-1 ${freshness === 'muted' ? 'text-amber-500/80' : 'text-zinc-600'}`}>
+            {termsLine}
+          </span>
+          </>
           )}
         </div>
       </div>
