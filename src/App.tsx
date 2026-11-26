@@ -9,6 +9,7 @@ import { PresenceRadar } from './components/PresenceRadar';
 import { VENUES, USER_CARDS } from './data/venues';
 import { CuisineType, Neighborhood, SortMode, CardProfile } from './types';
 import { isOpenNow, calculateDistance, calculateBestStack } from './utils/calculator';
+import { locationOutcome, requestLocation } from './utils/location';
 import { getHiddenVenueIds, hideVenue, unhideVenue, resetHiddenVenues } from './utils/storage';
 import { Utensils, RotateCcw } from 'lucide-react';
 
@@ -46,6 +47,7 @@ export const App: React.FC = () => {
   // Geolocation
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [locationNotice, setLocationNotice] = useState<string | null>(null);
 
   // Pagination / Virtual lazy slice for 1,300+ venues
   const [visibleCount, setVisibleCount] = useState(40);
@@ -83,32 +85,19 @@ export const App: React.FC = () => {
     });
   };
 
-  // Handle GPS location
-  const handleLocateMe = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
-      return;
-    }
-
+  // Handle GPS location (JER-788): a denied or failed lookup keeps the full list and the
+  // current sort and says so inline. Never invent a position.
+  const handleLocateMe = async () => {
     setLocationLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-        setLocationLoading(false);
-        setSortMode('closest');
-      },
-      (err) => {
-        console.warn('Geolocation error:', err);
-        // Default to Soho/West Village center for NYC testing
-        setUserLocation({ lat: 40.7308, lng: -74.0000 });
-        setLocationLoading(false);
-        setSortMode('closest');
-      },
-      { timeout: 8000, enableHighAccuracy: true }
-    );
+    const outcome = locationOutcome(await requestLocation(navigator.geolocation));
+    setLocationLoading(false);
+    if (outcome.userLocation) {
+      setUserLocation(outcome.userLocation);
+      setSortMode('closest');
+      setLocationNotice(null);
+    } else {
+      setLocationNotice(outcome.notice);
+    }
   };
 
   // Hide action with Undo toast
@@ -265,6 +254,17 @@ export const App: React.FC = () => {
             <strong className="text-zinc-200">{filteredVenues.length}</strong> spots
             {sortMode === 'closest' ? ' sorted by proximity' : ' sorted by highest reward'}
           </span>
+          {locationNotice && (
+            <span className="basis-full w-full text-[11px] text-amber-400/90 bg-amber-950/30 border border-amber-800/40 rounded-lg px-2.5 py-1.5 mt-1.5 flex items-center justify-between gap-2">
+              <span>{locationNotice}</span>
+              <button
+                onClick={handleLocateMe}
+                className="shrink-0 font-bold text-amber-300 hover:text-amber-200 underline underline-offset-2"
+              >
+                Try again
+              </button>
+            </span>
+          )}
           {openNowOnly && (
             <span className="text-emerald-400 font-bold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
