@@ -234,3 +234,17 @@ test('venue with no programs still gets directions, and no booking action withou
   const acts = venueNextActions(venue, 'https://maps.test/v2');
   assert.deepEqual(acts.map(a => a.program), ['Go']);
 });
+
+// JER-788 piece 5: neighborhood filter persistence
+import { getSavedNeighborhood, saveNeighborhood } from '../src/utils/storage';
+
+test('neighborhood filter round-trips through storage; junk falls back to null', () => {
+  assert.equal(getSavedNeighborhood(), null);
+  saveNeighborhood('West Village');
+  assert.equal(getSavedNeighborhood(), 'West Village');
+  localStorage.setItem('dining_arbitrage_neighborhood_v1', '{not json');
+  assert.equal(getSavedNeighborhood(), null);
+  localStorage.setItem('dining_arbitrage_neighborhood_v1', '123');
+  assert.equal(getSavedNeighborhood(), null);
+  localStorage.removeItem('dining_arbitrage_neighborhood_v1');
+});

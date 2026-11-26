@@ -45,3 +45,27 @@ export function resetHiddenVenues(): string[] {
     return [];
   }
 }
+
+const NEIGHBORHOOD_KEY = 'dining_arbitrage_neighborhood_v1';
+
+// JER-788 piece 5: the neighborhood filter survives reloads. Read side never throws
+// and only ever returns a plain string; the caller validates it against the catalog.
+export function getSavedNeighborhood(): string | null {
+  try {
+    const raw = localStorage.getItem(NEIGHBORHOOD_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    return typeof v === 'string' && v.length > 0 ? v : null;
+  } catch (e) {
+    console.error('Failed to read saved neighborhood from localStorage', e);
+    return null;
+  }
+}
+
+export function saveNeighborhood(neighborhood: string): void {
+  try {
+    localStorage.setItem(NEIGHBORHOOD_KEY, JSON.stringify(neighborhood));
+  } catch (e) {
+    console.error('Failed to save neighborhood', e);
+  }
+}
