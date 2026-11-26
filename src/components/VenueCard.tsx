@@ -214,28 +214,16 @@ export const VenueCard: React.FC<VenueCardProps> = ({
         </div>
       </div>
 
-      {/* Recommended Strategy Box (single high-contrast emerald focal point) */}
+      {/* Directive Action Forefront: tells you exactly what to do in one glance */}
       <div className="bg-[#10141D] border-t border-slate-800/90 p-3.5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/35">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/35 shrink-0">
                 {stack.effectiveValue}
               </span>
-              <span className="text-xs font-semibold text-slate-100 tracking-tight">
-                {stack.headline}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 mt-2 flex-wrap text-[11px] text-slate-300">
-              <span className="inline-flex items-center gap-1 font-medium text-slate-200">
-                {mechanic.icon}
-                <span>{mechanic.label}</span>
-              </span>
-              <span className="text-slate-600">•</span>
-              <span className="text-slate-300 flex items-center gap-1">
-                <CreditCard className="w-3 h-3 text-slate-400" />
-                <strong className="text-slate-100 font-medium">{stack.recommendedCard}</strong>
+              <span className="text-xs font-semibold text-slate-50 leading-snug">
+                {stack.directive}
               </span>
             </div>
           </div>

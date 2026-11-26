@@ -84,6 +84,11 @@ export interface BlackbirdReward {
   hasOpenTableHook?: boolean;
 }
 
+export interface ResyRewardsOffer {
+  available: boolean;
+  bonusMultiplier: number; // +4x Membership Rewards with enrolled Amex Gold = 8x total
+}
+
 export interface Venue {
   id: string;
   name: string;
@@ -99,6 +104,7 @@ export interface Venue {
   seated?: SeatedReward;
   bilt?: BiltReward;
   blackbird?: BlackbirdReward;
+  resyRewards?: ResyRewardsOffer;
   tags?: string[];
   rating?: number;
   reviewCount?: number;
@@ -116,8 +122,9 @@ export interface CardProfile {
 }
 
 export interface Recommendation {
-  primaryPlatform: 'inKind' | 'Seated' | 'Bilt' | 'Blackbird' | 'Direct Card';
+  primaryPlatform: 'inKind' | 'Seated' | 'Bilt' | 'Blackbird' | 'Resy Rewards' | 'Direct Card';
   headline: string;
+  directive: string;
   effectiveValue: string;
   rawPercentValue: number; // For sorting by highest yield
   recommendedCard: string;
