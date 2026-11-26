@@ -4,7 +4,7 @@ import {
   formatLinearIssueBody,
   formatLinearIssueTitle,
   validateFeedbackPayload,
-} from './feedback';
+} from './feedback.js';
 
 const LINEAR_GRAPHQL_URL = 'https://api.linear.app/graphql';
 const LINEAR_TEAM_KEY = 'JER';
