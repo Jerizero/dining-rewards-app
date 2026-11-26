@@ -125,6 +125,7 @@ test('terms line: muted flags staleness, hidden withholds numbers and names the 
   assert.match(hidden, /Sep 1, 2026/);
 });
 
+
 // JER-788 piece 2: Near Me never invents a position
 import { locationOutcome, requestLocation, LOCATION_OFF_NOTICE } from '../src/utils/location';
 
@@ -158,4 +159,43 @@ test('requestLocation maps browser outcomes, never fabricates coordinates', asyn
   });
   assert.deepEqual(failed, { kind: 'error' });
   assert.deepEqual(await requestLocation(undefined), { kind: 'unavailable' });
+});
+
+// JER-788 piece 3: data-layer venue dedupe
+import { normalizeVenueName, dedupeVenues } from '../src/utils/dedupe';
+import { VENUES, VENUE_DEDUPE_DROPS } from '../src/data/venues';
+
+test('normalizeVenueName folds case, punctuation and a trailing nyc', () => {
+  assert.equal(normalizeVenueName('Pesce lulu Seafood Kitchen NYC'), 'pesce lulu seafood kitchen');
+  assert.equal(normalizeVenueName('Pesce Lulu Seafood Kitchen'), 'pesce lulu seafood kitchen');
+  assert.equal(normalizeVenueName("L'Artusi"), 'l artusi');
+});
+
+test('same place within 300m collapses to the richer record; far twins survive', () => {
+  const base = {
+    neighborhood: 'Midtown', cuisine: 'Italian', priceRange: '$$', description: 'x', hours: [],
+  };
+  const rich = { ...base, id: 'a', name: 'Pesce Lulu Seafood Kitchen', address: '157 E 53rd St, New York, NY 10022', lat: 40.758083, lng: -73.970009, description: 'real record', bilt: { available: true } };
+  const thin = { ...base, id: 'b', name: 'Pesce lulu Seafood Kitchen NYC', address: 'Pesce lulu Seafood Kitchen NYC, Midtown East', lat: 40.7585, lng: -73.9705 };
+  const farTwin = { ...thin, id: 'c', lat: 40.9, lng: -73.9 };
+  const centroidNear = { ...thin, id: 'd', lat: 40.745, lng: -73.968 };  // ~600m out, no street address
+  const chainBranch = { ...rich, id: 'e', address: '200 W 44th St, New York, NY 10036', lat: 40.758, lng: -73.986 };
+  const r1 = dedupeVenues([thin, rich]);
+  assert.deepEqual(r1.venues.map(v => v.id), ['a']);
+  assert.deepEqual(r1.dropped, [{ keptId: 'a', droppedId: 'b', name: 'Pesce Lulu Seafood Kitchen' }]);
+  const r2 = dedupeVenues([rich, farTwin]);
+  assert.equal(r2.venues.length, 2);   // beyond 2 miles: survives
+  assert.equal(r2.dropped.length, 0);
+  const r3 = dedupeVenues([rich, centroidNear]);
+  assert.deepEqual(r3.venues.map(v => v.id), ['a']);  // centroid geocode collapses within 2 miles
+  const r4 = dedupeVenues([rich, chainBranch]);
+  assert.equal(r4.venues.length, 2);   // two real street addresses: a chain keeps both
+});
+
+test('the shipped catalog drops the Pesce Lulu duplicate and keeps the 53rd St record', () => {
+  const ids = new Set(VENUES.map(v => v.id));
+  assert.ok(ids.has('pesce-lulu-seafood-kitchen'));
+  assert.ok(!ids.has('pesce-lulu-seafood-kitchen-nyc'));
+  assert.equal(VENUES.length + VENUE_DEDUPE_DROPS.length, 3499);
+  assert.ok(VENUE_DEDUPE_DROPS.some(d => d.droppedId === 'pesce-lulu-seafood-kitchen-nyc'));
 });

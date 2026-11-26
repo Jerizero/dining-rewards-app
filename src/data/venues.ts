@@ -1,5 +1,6 @@
 import { Venue, CardProfile } from '../types';
 import venuesJson from './venues.json';
+import { dedupeVenues, DedupeDrop } from '../utils/dedupe';
 
 /**
  * Date the venue catalog's reward terms were last verified/refreshed, matching the
@@ -37,4 +38,8 @@ export const USER_CARDS: CardProfile[] = [
   },
 ];
 
-export const VENUES: Venue[] = venuesJson as Venue[];
+// JER-788 piece 3: duplicate venue records collapse at load (same normalized name within
+// 300m; the richer record wins). The dropped rows stay visible in VENUE_DEDUPE_DROPS.
+const catalogDedupe = dedupeVenues(venuesJson as Venue[]);
+export const VENUES: Venue[] = catalogDedupe.venues;
+export const VENUE_DEDUPE_DROPS: DedupeDrop[] = catalogDedupe.dropped;
