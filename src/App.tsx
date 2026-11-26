@@ -5,10 +5,12 @@ import { VenueCard } from './components/VenueCard';
 import { VenueDetailModal } from './components/VenueDetailModal';
 import { HiddenPlacesModal } from './components/HiddenPlacesModal';
 import { WalletModal } from './components/WalletModal';
+import { ImproveModal } from './components/ImproveModal';
 import { UndoToast } from './components/UndoToast';
 import { VENUES, USER_CARDS } from './data/venues';
 import { CuisineType, Neighborhood, SortMode, CardProfile, Venue } from './types';
 import { isOpenNow, calculateDistance, calculateBestStack } from './utils/calculator';
+import { FEEDBACK_APP_ID } from './utils/feedback';
 import { locationOutcome, requestLocation } from './utils/location';
 import { getHiddenVenueIds, hideVenue, unhideVenue, resetHiddenVenues, getSavedNeighborhood, saveNeighborhood } from './utils/storage';
 import { Utensils, RotateCcw } from 'lucide-react';
@@ -61,6 +63,11 @@ export const App: React.FC = () => {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationNotice, setLocationNotice] = useState<string | null>(null);
   const [detailVenue, setDetailVenue] = useState<Venue | null>(null);
+  const [feedbackTarget, setFeedbackTarget] = useState<
+    | { surface: 'header' }
+    | { surface: 'venue-card'; venue: Venue }
+    | null
+  >(null);
 
   // Pagination / Virtual lazy slice for 1,300+ venues
   const [visibleCount, setVisibleCount] = useState(40);
@@ -231,6 +238,7 @@ export const App: React.FC = () => {
         hiddenCount={hiddenIds.length}
         onOpenHiddenModal={() => setIsModalOpen(true)}
         onOpenWalletModal={() => setIsWalletOpen(true)}
+        onOpenImprove={() => setFeedbackTarget({ surface: 'header' })}
       />
 
       {/* Smart Filters Sticky Bar */}
@@ -308,6 +316,7 @@ export const App: React.FC = () => {
                 isRentDay={isRentDay}
                 distance={distance}
                 onHideVenue={handleHideVenue}
+                onFlagVenue={(v) => setFeedbackTarget({ surface: 'venue-card', venue: v })}
                 onShowDetails={setDetailVenue}
               />
             ))}
@@ -358,6 +367,27 @@ export const App: React.FC = () => {
         onClose={() => setIsWalletOpen(false)}
         cards={cards}
         onToggleCard={handleToggleCard}
+      />
+
+      {/* Improve / Flag Feedback Modal */}
+      <ImproveModal
+        isOpen={feedbackTarget !== null}
+        onClose={() => setFeedbackTarget(null)}
+        app={FEEDBACK_APP_ID}
+        surface={feedbackTarget?.surface ?? 'header'}
+        itemId={
+          feedbackTarget?.surface === 'venue-card'
+            ? feedbackTarget.venue.id || feedbackTarget.venue.name
+            : 'global'
+        }
+        itemLabel={
+          feedbackTarget?.surface === 'venue-card' ? feedbackTarget.venue.name : undefined
+        }
+        itemMeta={
+          feedbackTarget?.surface === 'venue-card'
+            ? `${feedbackTarget.venue.neighborhood} · ${feedbackTarget.venue.cuisine}`
+            : undefined
+        }
       />
     </div>
   );
