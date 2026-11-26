@@ -11,7 +11,7 @@ import { VENUES, USER_CARDS } from './data/venues';
 import { CuisineType, Neighborhood, SortMode, CardProfile, Venue } from './types';
 import { isOpenNow, calculateDistance, calculateBestStack } from './utils/calculator';
 import { locationOutcome, requestLocation } from './utils/location';
-import { getHiddenVenueIds, hideVenue, unhideVenue, resetHiddenVenues } from './utils/storage';
+import { getHiddenVenueIds, hideVenue, unhideVenue, resetHiddenVenues, getSavedNeighborhood, saveNeighborhood } from './utils/storage';
 import { Utensils, RotateCcw } from 'lucide-react';
 
 const CARDS_STORAGE_KEY = 'dining_arbitrage_cards_v1';
@@ -20,7 +20,19 @@ export const App: React.FC = () => {
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineType>('All');
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState<Neighborhood>('All');
+  // JER-788 piece 5: restore the neighborhood filter from the last visit, but only
+  // when it still names a real neighborhood in the catalog.
+  const [selectedNeighborhood, setSelectedNeighborhoodState] = useState<Neighborhood>(() => {
+    const saved = getSavedNeighborhood();
+    if (saved && (saved === 'All' || VENUES.some((v) => v.neighborhood === saved))) {
+      return saved as Neighborhood;
+    }
+    return 'All';
+  });
+  const setSelectedNeighborhood = (n: Neighborhood) => {
+    setSelectedNeighborhoodState(n);
+    saveNeighborhood(n);
+  };
   const [openNowOnly, setOpenNowOnly] = useState(false);
   const [platformFilter, setPlatformFilter] = useState('all');
   const [sortMode, setSortMode] = useState<SortMode>('top-reward');
