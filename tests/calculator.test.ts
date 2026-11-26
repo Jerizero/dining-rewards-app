@@ -124,3 +124,38 @@ test('terms line: muted flags staleness, hidden withholds numbers and names the 
   assert.match(hidden, /too stale to show/);
   assert.match(hidden, /Sep 1, 2026/);
 });
+
+// JER-788 piece 2: Near Me never invents a position
+import { locationOutcome, requestLocation, LOCATION_OFF_NOTICE } from '../src/utils/location';
+
+test('granted location sorts closest with no notice', () => {
+  const o = locationOutcome({ kind: 'granted', lat: 40.7, lng: -74.0 });
+  assert.deepEqual(o.userLocation, { lat: 40.7, lng: -74.0 });
+  assert.equal(o.setClosest, true);
+  assert.equal(o.notice, null);
+});
+
+test('denied, unavailable and error keep the list and say so', () => {
+  for (const kind of ['denied', 'unavailable', 'error'] as const) {
+    const o = locationOutcome({ kind });
+    assert.equal(o.userLocation, null);
+    assert.equal(o.setClosest, false);
+    assert.equal(o.notice, LOCATION_OFF_NOTICE);
+  }
+});
+
+test('requestLocation maps browser outcomes, never fabricates coordinates', async () => {
+  const granted = await requestLocation({
+    getCurrentPosition: (ok) => ok({ coords: { latitude: 1, longitude: 2 } }),
+  });
+  assert.deepEqual(granted, { kind: 'granted', lat: 1, lng: 2 });
+  const denied = await requestLocation({
+    getCurrentPosition: (_ok, err) => err({ code: 1, PERMISSION_DENIED: 1 }),
+  });
+  assert.deepEqual(denied, { kind: 'denied' });
+  const failed = await requestLocation({
+    getCurrentPosition: (_ok, err) => err({ code: 2, PERMISSION_DENIED: 1 }),
+  });
+  assert.deepEqual(failed, { kind: 'error' });
+  assert.deepEqual(await requestLocation(undefined), { kind: 'unavailable' });
+});
