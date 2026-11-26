@@ -33,8 +33,8 @@ export function venueNextActions(venue: Venue, mapsUrl: string): ProgramAction[]
     out.push({
       program: 'Bilt',
       action: venue.bilt.isNeighborhoodPartner
-        ? `Book through Bilt Dining (neighborhood partner) to earn ${venue.bilt.baseMultiplier}x Bilt Points.`
-        : `Book through Bilt Dining to earn ${venue.bilt.baseMultiplier}x Bilt Points.`,
+        ? `Pay with a Bilt-linked card (neighborhood partner) to earn ${venue.bilt.baseMultiplier}x Bilt Dining bonus (+3x on Bilt Card = ${venue.bilt.baseMultiplier + 3}x total).`
+        : `Pay with a Bilt-linked card to earn ${venue.bilt.baseMultiplier}x Bilt Dining bonus (+3x on Bilt Card = ${venue.bilt.baseMultiplier + 3}x total).`,
       url: venue.bookingUrl,
     });
   }

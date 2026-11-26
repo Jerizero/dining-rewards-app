@@ -92,6 +92,12 @@ export const VenueCard: React.FC<VenueCardProps> = ({
   ].filter(Boolean) as string[];
   const freshness = freshnessState(CATALOG_AS_OF);
   const termsLine = rewardTermsLine(CATALOG_AS_OF, rewardPrograms);
+  // Hide synthetic boilerplate descriptions that just echo name, neighborhood, cuisine, and rating.
+  const isTemplateEcho = /\boffering signature .+ fare\.\s*Rated\s+\d/i.test(venue.description || '');
+  const editorialDesc = isTemplateEcho ? '' : (venue.description || '').trim();
+  const compactTerms = freshness === 'hidden'
+    ? termsLine
+    : `Terms ${CATALOG_AS_OF.slice(5).replace('-', '/')}${freshness === 'muted' ? ' · re-verify' : ''}`;
 
   return (
     <div className="bg-[#141417] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm transition hover:border-white/[0.16]">
@@ -148,25 +154,27 @@ export const VenueCard: React.FC<VenueCardProps> = ({
           </button>
         </div>
 
-        <p className="text-xs text-zinc-400 mt-2 leading-relaxed line-clamp-2">
-          {venue.description}
-        </p>
+        {editorialDesc && (
+          <p className="text-xs text-zinc-400 mt-2 leading-relaxed line-clamp-2">
+            {editorialDesc}
+          </p>
+        )}
 
         {/* Platform Offer Badges */}
-        <div className="flex items-center gap-1.5 flex-wrap mt-3.5 pt-3 border-t border-white/[0.06]">
+        <div className="flex items-center gap-1.5 flex-wrap mt-3 pt-2.5 border-t border-white/[0.06]">
           {freshness === 'hidden' ? (
             <span className="text-[11px] text-zinc-500 italic">{termsLine}</span>
           ) : (
           <>
           {venue.inKind?.available && (
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
-              inKind {venue.inKind.bonusPercentage}% Bonus
+              inKind {venue.inKind.bonusPercentage}%
             </span>
           )}
 
           {venue.seated?.available && (
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-950/40 text-sky-300 border border-sky-800/40">
-              Seated {venue.seated.rewardPercentage}% Back
+              Seated {venue.seated.rewardPercentage}%
             </span>
           )}
 
@@ -185,8 +193,11 @@ export const VenueCard: React.FC<VenueCardProps> = ({
               Blackbird {venue.blackbird.flyEarn} $FLY
             </span>
           )}
-          <span className={`basis-full text-[10px] mt-1 ${freshness === 'muted' ? 'text-amber-500/80' : 'text-zinc-600'}`}>
-            {termsLine}
+          <span
+            className={`ml-auto text-[10px] font-mono ${freshness === 'muted' ? 'text-amber-500/75' : 'text-zinc-600'}`}
+            title={termsLine}
+          >
+            {compactTerms}
           </span>
           </>
           )}
@@ -230,25 +241,22 @@ export const VenueCard: React.FC<VenueCardProps> = ({
           </button>
         </div>
 
-        {/* Expandable Step-by-Step Breakdown */}
+        {/* Expandable Step-by-Step Breakdown (streamlined, zero redundant echo) */}
         {expanded && (
           <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2 text-xs text-zinc-300">
-            <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05]">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider block mb-1">
-                Payment Mechanic & Instructions
-              </span>
-              <p className="text-zinc-200 text-xs leading-relaxed">
-                {mechanic.desc}
-              </p>
-            </div>
+            <p className="text-zinc-200 text-xs leading-relaxed">
+              {mechanic.desc}
+            </p>
 
-            <div className="space-y-1.5 pt-1">
-              {stack.details.map((detail, idx) => (
-                <p key={idx} className="flex items-start gap-1.5 text-zinc-300 text-[11px]">
-                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                  <span>{detail}</span>
-                </p>
-              ))}
+            <div className="space-y-1">
+              {stack.details
+                .filter((d) => !/^Walk-ins accepted|^Requires reservation booking/i.test(d))
+                .map((detail, idx) => (
+                  <p key={idx} className="flex items-start gap-1.5 text-zinc-400 text-[11px]">
+                    <Check className="w-3.5 h-3.5 text-amber-400/90 shrink-0 mt-0.5" />
+                    <span>{detail.replace(/^⚡ Arbitrage Overlap:\s*/i, 'Also on: ')}</span>
+                  </p>
+                ))}
             </div>
 
             <div className="pt-2.5 flex items-center justify-between border-t border-white/[0.06] text-[11px] text-zinc-400">

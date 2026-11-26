@@ -136,7 +136,7 @@ export function calculateBestStack(
       recommendedCard: 'Bilt Mastercard (or any linked card in Bilt Wallet)',
       details: [
         `Earns ${basePts}x Bilt Dining bonus points`,
-        `Earns ${biltCardMultiplier}x from Bilt Card (${isRentDay ? 'Double Points on Rent Day!' : '3x standard dining'})`,
+        `Earns ${biltCardMultiplier}x from Bilt Card (${isRentDay ? 'Double Points on Rent Day, capped at 1,000 bonus pts / ~$333 spend' : '3x standard dining'})`,
         'Points transfer 1:1 to Hyatt, United, and top airline programs',
       ],
     });
