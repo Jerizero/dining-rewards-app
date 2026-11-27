@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0 --port 3030",
     "build": "tsc && vite build",
     "test": "esbuild tests/calculator.test.ts --bundle --platform=node --format=esm --outfile=.tmp-calculator.mjs && node --test .tmp-calculator.mjs && esbuild tests/classifier.test.ts --bundle --platform=node --format=esm --outfile=.tmp-classifier.mjs && node --test .tmp-classifier.mjs && esbuild tests/feedback.test.ts --bundle --platform=node --format=esm --outfile=.tmp-feedback.mjs && node --test .tmp-feedback.mjs && esbuild tests/nextActions.test.ts --bundle --platform=node --format=esm --outfile=.tmp-nextActions.mjs && node --test .tmp-nextActions.mjs && rm -f .tmp-calculator.mjs .tmp-classifier.mjs .tmp-feedback.mjs .tmp-nextActions.mjs",
-
+    "verify:prod": "bash scripts/verify-prod.sh",
     "preview": "vite preview"
   },
   "dependencies": {
